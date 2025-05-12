@@ -74,6 +74,21 @@ mesh = model.generate_mesh(points)
 mesh.export('glasses_3d.obj')
 ```
 
+### Processing a Dataset of Images
+
+If you have a dataset of glasses images (e.g., 600 images), you can use our dataset processing script:
+
+```bash
+# Process all images in a directory
+python scripts/process_dataset.py --dataset_path data/glasses --output_dir results/meshes
+
+# Process with visualization
+python scripts/process_dataset.py --dataset_path data/glasses --output_dir results/meshes --visualize
+
+# Process a limited number of images
+python scripts/process_dataset.py --dataset_path data/glasses --output_dir results/meshes --num_images 10
+```
+
 ### Fine-tuning for Specific Glasses Types
 
 ```python
@@ -127,11 +142,17 @@ python src/inference.py --image path/to/glasses_image.jpg --output glasses_3d.ob
 
 ### Google Colab
 
-1. Open our [Colab notebook](https://colab.research.google.com/github/amin8452/Pfa-3D/blob/master/notebooks/hunyuan3d_glasses_colab.ipynb)
-2. Follow the step-by-step instructions to:
+We provide two Colab notebooks:
+
+1. **General Usage**: [Hunyuan3D Glasses Colab](https://colab.research.google.com/github/amin8452/Pfa-3D/blob/master/notebooks/hunyuan3d_glasses_colab.ipynb)
    - Set up the environment
    - Download and adapt the Hunyuan3D-2 model
-   - Process your own glasses images
+   - Process individual glasses images
+
+2. **Dataset Processing**: [Process Glasses Dataset](https://colab.research.google.com/github/amin8452/Pfa-3D/blob/master/notebooks/process_glasses_dataset.ipynb)
+   - Specifically designed for processing large datasets (e.g., 600 images)
+   - Upload your dataset as a zip file or individual images
+   - Process all images and download the results
 
 ### Kaggle
 
