@@ -102,6 +102,8 @@ venv.bak/
 data/
 checkpoints/
 results/
+hunyuan3d_repo/
+Hunyuan3D-2/
 *.pth
 *.obj
 *.ply
