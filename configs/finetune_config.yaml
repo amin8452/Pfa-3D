@@ -1,0 +1,21 @@
+# Configuration for fine-tuning the Hunyuan3D-Glasses model
+
+# Data configuration
+data:
+  data_dir: "data"
+  num_workers: 4
+  img_size: 224
+  num_points: 2048
+
+# Model configuration
+model:
+  latent_dim: 512
+
+# Training configuration
+training:
+  batch_size: 16
+  learning_rate: 0.00001
+  weight_decay: 0.0001
+  num_epochs: 50
+  fine_tune: true
+  freeze_encoder: true

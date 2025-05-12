@@ -1,0 +1,17 @@
+# Configuration for evaluating the Hunyuan3D-Glasses model
+
+# Data configuration
+data:
+  data_dir: "data"
+  split: "test"
+  num_workers: 4
+  img_size: 224
+  num_points: 2048
+
+# Model configuration
+model:
+  latent_dim: 512
+
+# Evaluation configuration
+evaluation:
+  batch_size: 16
