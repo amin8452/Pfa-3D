@@ -99,7 +99,6 @@ venv.bak/
 .mypy_cache/
 
 # Project specific
-data/
 checkpoints/
 results/
 hunyuan3d_repo/
@@ -112,6 +111,12 @@ Hunyuan3D-2/
 *.html
 *.png
 *.jpg
+
+# Allow specific files and directories
+!data/
+!data/**/
+!data/**/.gitkeep
+!data/**/README.md
 !examples/*.png
 !examples/*.jpg
 
