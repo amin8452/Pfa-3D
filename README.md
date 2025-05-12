@@ -177,23 +177,6 @@ Hunyuan3D-Glasses/
 │   └── utils.py                # Utility functions
 └── README.md           # This file
 ```
-
-## GitHub Setup
-
-To push this project to your GitHub repository:
-
-1. Create a new repository on GitHub at https://github.com/amin8452/Pfa-3D
-
-2. Use the provided setup script:
-```bash
-python scripts/setup_github.py --username amin8452
-```
-
-3. Push to GitHub:
-```bash
-git push -u origin master
-```
-
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
@@ -233,16 +216,6 @@ This project is designed to run on cloud platforms with limited resources. Here'
 # Train the model (with reduced batch size for Kaggle's resources)
 !python src/train_glasses.py --config configs/train_config.yaml --output_dir checkpoints/initial_training
 ```
-
-### Resource Optimization
-
-When running on platforms with limited resources:
-
-1. Reduce batch size in config files (e.g., 8 or 16 instead of 32)
-2. Use a smaller dataset or fewer synthetic samples
-3. Reduce the number of training epochs
-4. Use a smaller model by reducing the latent dimension in the config files
-
 ## Acknowledgements
 
 - This project adapts the Hunyuan3D model for glasses reconstruction
