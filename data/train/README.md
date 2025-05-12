@@ -17,7 +17,7 @@ data/
     └── models/
 ```
 
-## Adding Training Images
+##  Adding Training Images
 
 To add training images:
 
