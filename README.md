@@ -13,6 +13,7 @@ This project adapts the Hunyuan3D model for the specific task of reconstructing 
 - Comprehensive evaluation metrics (Chamfer distance, EMD, IoU)
 - Visualization tools for 3D reconstruction results
 - Training and validation pipelines
+- Support for Google Colab and Kaggle environments
 
 ## Installation
 
@@ -22,7 +23,7 @@ This project adapts the Hunyuan3D model for the specific task of reconstructing 
 - PyTorch 1.9+
 - CUDA (for GPU acceleration)
 
-### Setup
+### Local Setup
 
 1. Clone the repository:
 ```bash
@@ -40,9 +41,26 @@ pip install -r requirements.txt
 python scripts/download_pretrained.py
 ```
 
+### Google Colab / Kaggle Setup
+
+You can run this project on Google Colab or Kaggle without a local installation:
+
+1. Open the notebook in Google Colab:
+   - [Open Hunyuan3D-Glasses Colab Notebook](https://colab.research.google.com/github/amin8452/Hunyuan3D-Glasses/blob/master/notebooks/hunyuan3d_glasses_colab.ipynb)
+
+2. Or use the provided setup script:
+```python
+# Clone the repository
+!git clone https://github.com/amin8452/Hunyuan3D-Glasses.git
+%cd Hunyuan3D-Glasses
+
+# Set up the environment
+!python scripts/setup_colab.py
+```
+
 ## Dataset
 
-The project uses a dataset of 2D glasses images paired with their 3D models. 
+The project uses a dataset of 2D glasses images paired with their 3D models.
 
 ### Dataset Structure
 
@@ -74,7 +92,21 @@ data/
 To use your own dataset:
 
 1. Organize your data following the structure above
-2. Update the data paths in `config.py`
+2. Update the data paths in the configuration files
+
+### Generating Synthetic Data
+
+If you don't have a real dataset, you can generate synthetic data:
+
+```bash
+python scripts/synthetic_data_generator.py --num_samples 1000
+```
+
+This script will:
+1. Create primitive 3D glasses models or use base models if provided
+2. Generate variations of these models
+3. Render the models from different angles to create 2D images
+4. Save the data in the required directory structure
 
 ## Usage
 
@@ -130,6 +162,11 @@ Hunyuan3D-Glasses/
 ├── notebooks/          # Jupyter notebooks for visualization
 ├── results/            # Evaluation results and visualizations
 ├── scripts/            # Utility scripts
+│   ├── create_data_dirs.py     # Create data directory structure
+│   ├── download_pretrained.py  # Download pre-trained models
+│   ├── setup_colab.py          # Set up environment on Colab/Kaggle
+│   ├── setup_github.py         # Set up GitHub repository
+│   └── synthetic_data_generator.py  # Generate synthetic dataset
 ├── src/                # Source code
 │   ├── data_loader_glasses.py  # Data loading utilities
 │   ├── evaluate_glasses.py     # Evaluation script
@@ -141,9 +178,70 @@ Hunyuan3D-Glasses/
 └── README.md           # This file
 ```
 
+## GitHub Setup
+
+To push this project to your GitHub repository:
+
+1. Create a new repository on GitHub at https://github.com/amin8452/Hunyuan3D-Glasses
+
+2. Use the provided setup script:
+```bash
+python scripts/setup_github.py --username amin8452
+```
+
+3. Push to GitHub:
+```bash
+git push -u origin master
+```
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Running on Colab/Kaggle
+
+This project is designed to run on cloud platforms with limited resources. Here's how to use it on Google Colab or Kaggle:
+
+### Google Colab
+
+1. Open the provided notebook:
+   - [Open Hunyuan3D-Glasses Colab Notebook](https://colab.research.google.com/github/amin8452/Hunyuan3D-Glasses/blob/master/notebooks/hunyuan3d_glasses_colab.ipynb)
+
+2. Follow the instructions in the notebook to:
+   - Set up the environment
+   - Generate or upload a dataset
+   - Train the model
+   - Evaluate results
+   - Perform inference
+
+### Kaggle
+
+1. Create a new notebook on Kaggle
+2. Add the following code to get started:
+
+```python
+# Clone the repository
+!git clone https://github.com/amin8452/Hunyuan3D-Glasses.git
+%cd Hunyuan3D-Glasses
+
+# Set up the environment
+!python scripts/setup_colab.py --platform kaggle
+
+# Generate synthetic data
+!python scripts/synthetic_data_generator.py --num_samples 500
+
+# Train the model (with reduced batch size for Kaggle's resources)
+!python src/train_glasses.py --config configs/train_config.yaml --output_dir checkpoints/initial_training
+```
+
+### Resource Optimization
+
+When running on platforms with limited resources:
+
+1. Reduce batch size in config files (e.g., 8 or 16 instead of 32)
+2. Use a smaller dataset or fewer synthetic samples
+3. Reduce the number of training epochs
+4. Use a smaller model by reducing the latent dimension in the config files
 
 ## Acknowledgements
 
