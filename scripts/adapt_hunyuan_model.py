@@ -25,8 +25,24 @@ def check_hunyuan_repo(hunyuan_dir):
     """
     Check if the Hunyuan3D-2 repository exists and has the necessary files
     """
+    # Check if the specified directory exists
     if not os.path.exists(hunyuan_dir):
         print(f"Error: Directory {hunyuan_dir} does not exist.")
+
+        # Check if Hunyuan3D-2 directory exists (common alternative)
+        alt_dir = "Hunyuan3D-2"
+        if os.path.exists(alt_dir):
+            print(f"However, found a Hunyuan3D-2 directory. You can use it with:")
+            print(f"python scripts/adapt_hunyuan_model.py --hunyuan_dir {alt_dir}")
+            return False
+
+        # Check if hunyuan3d_repo directory exists (another alternative)
+        alt_dir2 = "hunyuan3d_repo"
+        if os.path.exists(alt_dir2):
+            print(f"However, found a hunyuan3d_repo directory. You can use it with:")
+            print(f"python scripts/adapt_hunyuan_model.py --hunyuan_dir {alt_dir2}")
+            return False
+
         print("Please clone the Hunyuan3D-2 repository first with:")
         print("python scripts/download_pretrained.py --model repo")
         return False

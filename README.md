@@ -48,7 +48,8 @@ python scripts/download_pretrained.py --model repo
 python scripts/download_pretrained.py --model all
 
 # Adapt the model for glasses reconstruction
-python scripts/adapt_hunyuan_model.py --hunyuan_dir hunyuan3d_repo
+# Note: Use the correct directory name where the repository was cloned
+python scripts/adapt_hunyuan_model.py --hunyuan_dir Hunyuan3D-2
 ```
 
 ## Using the Hunyuan3D-2 Model
@@ -145,7 +146,8 @@ python src/inference.py --image path/to/glasses_image.jpg --output glasses_3d.ob
 # Download and adapt the model
 !python scripts/download_pretrained.py --model repo
 !python scripts/download_pretrained.py --model all
-!python scripts/adapt_hunyuan_model.py --hunyuan_dir hunyuan3d_repo
+# Note: Use the correct directory name where the repository was cloned
+!python scripts/adapt_hunyuan_model.py --hunyuan_dir Hunyuan3D-2
 ```
 
 ## Project Structure

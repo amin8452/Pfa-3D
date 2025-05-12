@@ -208,27 +208,30 @@ def main():
     model_files = find_model_files(args.hunyuan_dir)
 
     # Define models to download from Hugging Face
+    # Currently only the base model URL is working reliably
     models = {
         'base': {
             'url': 'https://huggingface.co/tencent/Hunyuan3D-2/resolve/main/hunyuan3d-dit-v2-0/model.safetensors',
             'output_path': os.path.join(args.output_dir, 'hunyuan3d_base.safetensors'),
             'md5': None  # Add MD5 when available
-        },
-        'finetuned': {
-            'url': 'https://huggingface.co/tencent/Hunyuan3D-2/resolve/main/hunyuan3d-paint-v2-0/model.safetensors',
-            'output_path': os.path.join(args.output_dir, 'hunyuan3d_paint.safetensors'),
-            'md5': None  # Add MD5 when available
-        },
-        'mini': {
-            'url': 'https://huggingface.co/tencent/Hunyuan3D-2mini/resolve/main/hunyuan3d-dit-v2-mini/model.safetensors',
-            'output_path': os.path.join(args.output_dir, 'hunyuan3d_mini.safetensors'),
-            'md5': None  # Add MD5 when available
-        },
-        'turbo': {
-            'url': 'https://huggingface.co/tencent/Hunyuan3D-2/resolve/main/hunyuan3d-dit-v2-0-turbo/model.safetensors',
-            'output_path': os.path.join(args.output_dir, 'hunyuan3d_turbo.safetensors'),
-            'md5': None  # Add MD5 when available
         }
+        # Other models are commented out as they were not found at the specified URLs
+        # Uncomment if URLs become available
+        # 'finetuned': {
+        #     'url': 'https://huggingface.co/tencent/Hunyuan3D-2/resolve/main/hunyuan3d-paint-v2-0/model.safetensors',
+        #     'output_path': os.path.join(args.output_dir, 'hunyuan3d_paint.safetensors'),
+        #     'md5': None
+        # },
+        # 'mini': {
+        #     'url': 'https://huggingface.co/tencent/Hunyuan3D-2mini/resolve/main/hunyuan3d-dit-v2-mini/model.safetensors',
+        #     'output_path': os.path.join(args.output_dir, 'hunyuan3d_mini.safetensors'),
+        #     'md5': None
+        # },
+        # 'turbo': {
+        #     'url': 'https://huggingface.co/tencent/Hunyuan3D-2/resolve/main/hunyuan3d-dit-v2-0-turbo/model.safetensors',
+        #     'output_path': os.path.join(args.output_dir, 'hunyuan3d_turbo.safetensors'),
+        #     'md5': None
+        # }
     }
 
     # Determine which models to download
