@@ -228,22 +228,27 @@ python scripts/download_pretrained.py --model repo
 
 This will clone the official Hunyuan3D-2 repository to your local machine.
 
-### 2. Download Pre-trained Models
+### 2. Download Pre-trained Models from Hugging Face
 
 ```bash
 python scripts/download_pretrained.py --model all
 ```
 
-This will download the pre-trained models from the Hunyuan3D-2 repository.
+This will download the pre-trained models from Hugging Face:
+- Base shape model: [hunyuan3d-dit-v2-0](https://huggingface.co/tencent/Hunyuan3D-2/tree/main/hunyuan3d-dit-v2-0)
+- Texture model: [hunyuan3d-paint-v2-0](https://huggingface.co/tencent/Hunyuan3D-2/tree/main/hunyuan3d-paint-v2-0)
+- Mini model: [hunyuan3d-dit-v2-mini](https://huggingface.co/tencent/Hunyuan3D-2mini/tree/main/hunyuan3d-dit-v2-mini)
+- Turbo model: [hunyuan3d-dit-v2-0-turbo](https://huggingface.co/tencent/Hunyuan3D-2/tree/main/hunyuan3d-dit-v2-0-turbo)
 
 ### 3. Adapt the Model for Glasses Reconstruction
 
 ```bash
-python scripts/adapt_hunyuan_model.py
+python scripts/adapt_hunyuan_model.py --hunyuan_dir hunyuan3d_repo
 ```
 
 This script will:
-- Copy the necessary files from the Hunyuan3D-2 repository
+- Analyze the Hunyuan3D-2 repository structure
+- Copy the necessary model files
 - Create adapter classes to integrate with our glasses reconstruction pipeline
 - Set up the model for fine-tuning
 
@@ -254,13 +259,35 @@ from src.hunyuan_adapted.adapter import load_hunyuan_model
 
 # Load the adapted model
 model = load_hunyuan_model(
-    checkpoint_path='checkpoints/hunyuan3d_base.pth',
+    checkpoint_path='checkpoints/hunyuan3d_base.safetensors',
     latent_dim=512,
     num_points=2048
 )
 
+# Process an image
+points = model('path/to/image.jpg')
+
+# Generate a mesh from points
+mesh = model.generate_mesh(points)
+mesh.export('output.obj')
+
 # Fine-tune the model
 model.fine_tune(freeze_hunyuan=True)
+```
+
+### 5. Alternative: Use the Lightweight Version
+
+If you have limited resources, you can use the mini model:
+
+```python
+from src.hunyuan_adapted.adapter import load_hunyuan_model
+
+# Load the mini model
+model = load_hunyuan_model(
+    checkpoint_path='checkpoints/hunyuan3d_mini.safetensors',
+    latent_dim=512,
+    num_points=2048
+)
 ```
 
 ## Acknowledgements

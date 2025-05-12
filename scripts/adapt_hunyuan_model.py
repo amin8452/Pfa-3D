@@ -180,9 +180,23 @@ import os
 import torch
 import torch.nn as nn
 import numpy as np
+import trimesh
+from PIL import Image
+import torchvision.transforms as transforms
+from safetensors.torch import load_file
 
-from .network import Network
-from .renderer import Renderer
+# Import any available modules from the copied files
+try:
+    from .network import Network
+    has_network = True
+except ImportError:
+    has_network = False
+
+try:
+    from .renderer import Renderer
+    has_renderer = True
+except ImportError:
+    has_renderer = False
 
 
 class Hunyuan3DAdapter(nn.Module):
@@ -190,9 +204,10 @@ class Hunyuan3DAdapter(nn.Module):
     Adapter class for Hunyuan3D-2 model
 
     This class adapts the Hunyuan3D-2 model for glasses reconstruction by:
-    1. Loading the pre-trained Hunyuan3D-2 model
-    2. Adapting the input/output interfaces to match our glasses reconstruction pipeline
-    3. Providing fine-tuning capabilities
+    1. Loading the pre-trained Hunyuan3D-2 model if available
+    2. Providing a standalone implementation if the original model is not available
+    3. Adapting the input/output interfaces to match our glasses reconstruction pipeline
+    4. Providing fine-tuning capabilities
     \"\"\"
 
     def __init__(self, checkpoint_path=None, latent_dim=512, num_points=2048):
@@ -201,13 +216,13 @@ class Hunyuan3DAdapter(nn.Module):
         self.latent_dim = latent_dim
         self.num_points = num_points
 
-        # Create Hunyuan3D-2 network
-        self.network = Network()
+        # Create Hunyuan3D-2 network if available
+        self.has_hunyuan = has_network and has_renderer
+        if self.has_hunyuan:
+            self.network = Network()
+            self.renderer = Renderer()
 
-        # Create renderer
-        self.renderer = Renderer()
-
-        # Create adapter layers
+        # Create adapter layers (used in both cases)
         self.image_encoder = nn.Sequential(
             nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3),
             nn.BatchNorm2d(64),
@@ -247,30 +262,82 @@ class Hunyuan3DAdapter(nn.Module):
             print(f"Warning: Checkpoint {checkpoint_path} not found. Using random initialization.")
             return
 
-        checkpoint = torch.load(checkpoint_path, map_location='cpu')
+        try:
+            # Try to load using safetensors first (for Hugging Face models)
+            if checkpoint_path.endswith('.safetensors'):
+                checkpoint = load_file(checkpoint_path)
+                print(f"Loaded checkpoint from {checkpoint_path} using safetensors")
+            else:
+                # Fall back to PyTorch loading
+                checkpoint = torch.load(checkpoint_path, map_location='cpu')
+                print(f"Loaded checkpoint from {checkpoint_path} using torch.load")
 
-        # Load Hunyuan3D-2 weights
-        if 'network' in checkpoint:
-            self.network.load_state_dict(checkpoint['network'])
-            print(f"Loaded Hunyuan3D-2 network weights from {checkpoint_path}")
+            # If we have the Hunyuan3D-2 network, try to load its weights
+            if self.has_hunyuan:
+                if 'network' in checkpoint:
+                    self.network.load_state_dict(checkpoint['network'])
+                    print(f"Loaded Hunyuan3D-2 network weights")
+
+                if 'renderer' in checkpoint:
+                    self.renderer.load_state_dict(checkpoint['renderer'])
+                    print(f"Loaded Hunyuan3D-2 renderer weights")
+
+            # Always try to load adapter weights if they exist
+            # This allows for fine-tuning the adapter separately
+            adapter_keys = [k for k in checkpoint.keys() if k.startswith('image_encoder') or k.startswith('point_decoder')]
+            if adapter_keys:
+                # Create a state dict with just the adapter keys
+                adapter_state_dict = {k: checkpoint[k] for k in adapter_keys}
+                # Load the adapter weights
+                missing_keys, unexpected_keys = self.load_state_dict(adapter_state_dict, strict=False)
+                print(f"Loaded adapter weights. Missing keys: {missing_keys}, Unexpected keys: {unexpected_keys}")
+
+        except Exception as e:
+            print(f"Error loading checkpoint: {e}")
+            print("Using random initialization instead.")
+
+    def preprocess_image(self, image_path):
+        \"\"\"
+        Preprocess an image for the model
+
+        Args:
+            image_path: Path to the image or PIL Image
+
+        Returns:
+            tensor: Preprocessed image tensor (1, C, H, W)
+        \"\"\"
+        if isinstance(image_path, str):
+            # Load image from path
+            image = Image.open(image_path).convert('RGB')
         else:
-            print(f"Warning: Checkpoint {checkpoint_path} does not contain network weights.")
+            # Assume it's already a PIL Image
+            image = image_path
 
-        # Load renderer weights if available
-        if 'renderer' in checkpoint:
-            self.renderer.load_state_dict(checkpoint['renderer'])
-            print(f"Loaded Hunyuan3D-2 renderer weights from {checkpoint_path}")
+        # Define transforms
+        transform = transforms.Compose([
+            transforms.Resize((224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        ])
+
+        # Apply transforms and add batch dimension
+        tensor = transform(image).unsqueeze(0)
+        return tensor
 
     def forward(self, x):
         \"\"\"
         Forward pass
 
         Args:
-            x: Input image tensor (B, C, H, W)
+            x: Input image tensor (B, C, H, W) or path to image
 
         Returns:
             points: 3D point cloud (B, num_points, 3)
         \"\"\"
+        # Preprocess image if it's a path
+        if isinstance(x, str):
+            x = self.preprocess_image(x)
+
         # Encode image to latent representation
         latent = self.image_encoder(x)
 
@@ -280,6 +347,43 @@ class Hunyuan3DAdapter(nn.Module):
 
         return points
 
+    def generate_mesh(self, points):
+        \"\"\"
+        Generate a mesh from points
+
+        Args:
+            points: Point cloud tensor (B, N, 3) or (N, 3)
+
+        Returns:
+            mesh: Trimesh object
+        \"\"\"
+        # Ensure points is a numpy array
+        if isinstance(points, torch.Tensor):
+            points = points.detach().cpu().numpy()
+
+        # Remove batch dimension if present
+        if len(points.shape) == 3:
+            points = points[0]
+
+        # Create a point cloud
+        point_cloud = trimesh.points.PointCloud(points)
+
+        # Create a mesh using Poisson reconstruction or ball pivoting
+        try:
+            # Try to use Poisson reconstruction (requires Open3D)
+            import open3d as o3d
+            pcd = o3d.geometry.PointCloud()
+            pcd.points = o3d.utility.Vector3dVector(points)
+            pcd.estimate_normals()
+
+            mesh = o3d.geometry.TriangleMesh.create_from_point_cloud_poisson(pcd, depth=8)[0]
+            mesh = trimesh.Trimesh(np.asarray(mesh.vertices), np.asarray(mesh.triangles))
+        except:
+            # Fall back to a simpler method
+            mesh = trimesh.voxel.ops.points_to_marching_cubes(points, pitch=0.05, radius=0.02)
+
+        return mesh
+
     def fine_tune(self, freeze_hunyuan=True):
         \"\"\"
         Prepare model for fine-tuning
@@ -287,8 +391,8 @@ class Hunyuan3DAdapter(nn.Module):
         Args:
             freeze_hunyuan: If True, freeze the Hunyuan3D-2 parameters
         \"\"\"
-        # Freeze Hunyuan3D-2 parameters if requested
-        if freeze_hunyuan:
+        # Freeze Hunyuan3D-2 parameters if requested and available
+        if freeze_hunyuan and self.has_hunyuan:
             for param in self.network.parameters():
                 param.requires_grad = False
 

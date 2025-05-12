@@ -207,16 +207,26 @@ def main():
     # Find model files in the cloned repository
     model_files = find_model_files(args.hunyuan_dir)
 
-    # Define models to download from Tencent/Hunyuan3D-2
+    # Define models to download from Hugging Face
     models = {
         'base': {
-            'url': 'https://github.com/Tencent/Hunyuan3D-2/releases/download/v1.0.0/hunyuan3d_base.pth',
-            'output_path': os.path.join(args.output_dir, 'hunyuan3d_base.pth'),
+            'url': 'https://huggingface.co/tencent/Hunyuan3D-2/resolve/main/hunyuan3d-dit-v2-0/model.safetensors',
+            'output_path': os.path.join(args.output_dir, 'hunyuan3d_base.safetensors'),
             'md5': None  # Add MD5 when available
         },
         'finetuned': {
-            'url': 'https://github.com/Tencent/Hunyuan3D-2/releases/download/v1.0.0/hunyuan3d_finetuned.pth',
-            'output_path': os.path.join(args.output_dir, 'hunyuan3d_finetuned.pth'),
+            'url': 'https://huggingface.co/tencent/Hunyuan3D-2/resolve/main/hunyuan3d-paint-v2-0/model.safetensors',
+            'output_path': os.path.join(args.output_dir, 'hunyuan3d_paint.safetensors'),
+            'md5': None  # Add MD5 when available
+        },
+        'mini': {
+            'url': 'https://huggingface.co/tencent/Hunyuan3D-2mini/resolve/main/hunyuan3d-dit-v2-mini/model.safetensors',
+            'output_path': os.path.join(args.output_dir, 'hunyuan3d_mini.safetensors'),
+            'md5': None  # Add MD5 when available
+        },
+        'turbo': {
+            'url': 'https://huggingface.co/tencent/Hunyuan3D-2/resolve/main/hunyuan3d-dit-v2-0-turbo/model.safetensors',
+            'output_path': os.path.join(args.output_dir, 'hunyuan3d_turbo.safetensors'),
             'md5': None  # Add MD5 when available
         }
     }
