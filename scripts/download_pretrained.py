@@ -9,6 +9,7 @@ from tqdm import tqdm
 import hashlib
 import subprocess
 import sys
+import shutil
 
 
 def parse_args():
@@ -100,6 +101,77 @@ def clone_hunyuan3d_repo(output_dir):
         return False
 
 
+def find_model_files(hunyuan_dir):
+    """
+    Find model files in the Hunyuan3D-2 repository
+
+    Returns:
+        dict: Dictionary of model files found
+    """
+    model_files = {}
+
+    # Check if the repository directory exists
+    if not os.path.exists(hunyuan_dir):
+        return model_files
+
+    # Common locations for model files in ML repositories
+    potential_locations = [
+        os.path.join(hunyuan_dir, 'checkpoints'),
+        os.path.join(hunyuan_dir, 'pretrained'),
+        os.path.join(hunyuan_dir, 'weights'),
+        os.path.join(hunyuan_dir, 'models'),
+        hunyuan_dir
+    ]
+
+    # Common model file extensions
+    model_extensions = ['.pth', '.pt', '.ckpt', '.bin', '.weights']
+
+    # Search for model files
+    for location in potential_locations:
+        if os.path.exists(location) and os.path.isdir(location):
+            for root, _, files in os.walk(location):
+                for file in files:
+                    if any(file.endswith(ext) for ext in model_extensions):
+                        file_path = os.path.join(root, file)
+                        file_size = os.path.getsize(file_path) / (1024 * 1024)  # Size in MB
+
+                        # Only consider files larger than 10MB as potential model files
+                        if file_size > 10:
+                            # Determine model type based on filename
+                            model_type = 'base'
+                            if 'fine' in file.lower() or 'tuned' in file.lower():
+                                model_type = 'finetuned'
+
+                            # Add to model files
+                            if model_type not in model_files:
+                                model_files[model_type] = []
+
+                            model_files[model_type].append({
+                                'path': file_path,
+                                'size': file_size,
+                                'name': file
+                            })
+
+    return model_files
+
+
+def copy_model_file(source_path, target_path):
+    """
+    Copy a model file from source to target
+    """
+    try:
+        # Create target directory if it doesn't exist
+        os.makedirs(os.path.dirname(target_path), exist_ok=True)
+
+        # Copy the file
+        shutil.copy2(source_path, target_path)
+        print(f"Copied model file from {source_path} to {target_path}")
+        return True
+    except Exception as e:
+        print(f"Error copying model file: {e}")
+        return False
+
+
 def main():
     args = parse_args()
 
@@ -108,10 +180,32 @@ def main():
         success = clone_hunyuan3d_repo(args.hunyuan_dir)
         if success:
             print(f"Hunyuan3D-2 repository cloned to {args.hunyuan_dir}")
-            print("You can now use the models and code from the original repository.")
+
+            # Find model files in the cloned repository
+            model_files = find_model_files(args.hunyuan_dir)
+
+            if model_files:
+                print("\nFound the following model files in the repository:")
+                for model_type, files in model_files.items():
+                    print(f"\n{model_type.capitalize()} models:")
+                    for i, file_info in enumerate(files):
+                        print(f"  {i+1}. {file_info['name']} ({file_info['size']:.2f} MB)")
+
+                print("\nYou can use these models directly or copy them to your checkpoints directory.")
+                print("To copy them, run: python scripts/download_pretrained.py --model all")
+            else:
+                print("\nNo model files found in the repository.")
+                print("The repository might not include pre-trained weights.")
+                print("Check the repository's README for instructions on how to obtain pre-trained weights.")
         else:
             print("Failed to clone repository. Please check your internet connection and try again.")
         return
+
+    # Create output directory if it doesn't exist
+    os.makedirs(args.output_dir, exist_ok=True)
+
+    # Find model files in the cloned repository
+    model_files = find_model_files(args.hunyuan_dir)
 
     # Define models to download from Tencent/Hunyuan3D-2
     models = {
@@ -133,12 +227,22 @@ def main():
     else:
         models_to_download = [args.model]
 
-    # Create output directory if it doesn't exist
-    os.makedirs(args.output_dir, exist_ok=True)
-
-    # Download models
+    # Process models
     for model_name in models_to_download:
         model_info = models[model_name]
+
+        # Check if model file exists in the cloned repository
+        if model_name in model_files and model_files[model_name]:
+            # Use the first model file found
+            source_path = model_files[model_name][0]['path']
+            print(f"Found {model_name} model in the cloned repository: {source_path}")
+
+            # Copy the model file
+            if copy_model_file(source_path, model_info['output_path']):
+                print(f"Successfully copied {model_name} model to {model_info['output_path']}")
+                continue
+
+        # If model file not found in repository or copy failed, try downloading
         print(f"Downloading {model_name} model...")
         try:
             download_file(
@@ -150,6 +254,7 @@ def main():
         except Exception as e:
             print(f"Error downloading {model_name} model: {e}")
             print(f"You may want to try cloning the entire repository with: python scripts/download_pretrained.py --model repo")
+            print(f"Then check the repository's README for instructions on how to obtain pre-trained weights.")
 
     print("Download complete!")
 
