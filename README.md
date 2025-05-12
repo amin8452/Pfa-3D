@@ -27,8 +27,8 @@ This project adapts the Hunyuan3D model for the specific task of reconstructing 
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/amin8452/Hunyuan3D-Glasses.git
-cd Hunyuan3D-Glasses
+git clone https://github.com/amin8452/Pfa-3D.git
+cd Pfa-3D
 ```
 
 2. Install dependencies:
@@ -46,13 +46,13 @@ python scripts/download_pretrained.py
 You can run this project on Google Colab or Kaggle without a local installation:
 
 1. Open the notebook in Google Colab:
-   - [Open Hunyuan3D-Glasses Colab Notebook](https://colab.research.google.com/github/amin8452/Hunyuan3D-Glasses/blob/master/notebooks/hunyuan3d_glasses_colab.ipynb)
+   - [Open Pfa-3D Colab Notebook](https://colab.research.google.com/github/amin8452/Pfa-3D/blob/master/notebooks/hunyuan3d_glasses_colab.ipynb)
 
 2. Or use the provided setup script:
 ```python
 # Clone the repository
-!git clone https://github.com/amin8452/Hunyuan3D-Glasses.git
-%cd Hunyuan3D-Glasses
+!git clone https://github.com/amin8452/Pfa-3D.git
+%cd Pfa-3D
 
 # Set up the environment
 !python scripts/setup_colab.py
@@ -182,7 +182,7 @@ Hunyuan3D-Glasses/
 
 To push this project to your GitHub repository:
 
-1. Create a new repository on GitHub at https://github.com/amin8452/Hunyuan3D-Glasses
+1. Create a new repository on GitHub at https://github.com/amin8452/Pfa-3D
 
 2. Use the provided setup script:
 ```bash
@@ -221,8 +221,8 @@ This project is designed to run on cloud platforms with limited resources. Here'
 
 ```python
 # Clone the repository
-!git clone https://github.com/amin8452/Hunyuan3D-Glasses.git
-%cd Hunyuan3D-Glasses
+!git clone https://github.com/amin8452/Pfa-3D.git
+%cd Pfa-3D
 
 # Set up the environment
 !python scripts/setup_colab.py --platform kaggle

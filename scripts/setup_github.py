@@ -18,10 +18,10 @@ def run_command(command):
     return True
 
 
-def setup_github(username, repo_name="Hunyuan3D-Glasses", remote_url=None):
+def setup_github(username, repo_name="Pfa-3D", remote_url=None):
     """
     Set up the GitHub repository
-    
+
     Args:
         username: GitHub username
         repo_name: Repository name
@@ -30,24 +30,24 @@ def setup_github(username, repo_name="Hunyuan3D-Glasses", remote_url=None):
     # Initialize git repository if not already initialized
     if not os.path.exists(".git"):
         run_command("git init")
-    
+
     # Add all files
     run_command("git add .")
-    
+
     # Commit
     run_command('git commit -m "Initial commit: Hunyuan3D-Glasses project setup"')
-    
+
     # Set up remote
     if remote_url is None:
         remote_url = f"https://github.com/{username}/{repo_name}.git"
-    
+
     # Check if remote already exists
     result = subprocess.run("git remote -v", shell=True, capture_output=True, text=True)
     if "origin" not in result.stdout:
         run_command(f"git remote add origin {remote_url}")
     else:
         print("Remote 'origin' already exists.")
-    
+
     print(f"\nRepository set up successfully!")
     print(f"Remote URL: {remote_url}")
     print("\nTo push to GitHub, run:")
@@ -59,9 +59,9 @@ def setup_github(username, repo_name="Hunyuan3D-Glasses", remote_url=None):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Set up GitHub repository")
     parser.add_argument("--username", required=True, help="GitHub username")
-    parser.add_argument("--repo_name", default="Hunyuan3D-Glasses", help="Repository name")
+    parser.add_argument("--repo_name", default="Pfa-3D", help="Repository name")
     parser.add_argument("--remote_url", help="Remote URL (if already created)")
-    
+
     args = parser.parse_args()
-    
+
     setup_github(args.username, args.repo_name, args.remote_url)
