@@ -216,7 +216,54 @@ This project is designed to run on cloud platforms with limited resources. Here'
 # Train the model (with reduced batch size for Kaggle's resources)
 !python src/train_glasses.py --config configs/train_config.yaml --output_dir checkpoints/initial_training
 ```
+## Using Tencent's Hunyuan3D-2 Model
+
+This project adapts the [Hunyuan3D-2 model from Tencent](https://github.com/Tencent/Hunyuan3D-2) for glasses reconstruction. Follow these steps to use the original model:
+
+### 1. Clone the Hunyuan3D-2 Repository
+
+```bash
+python scripts/download_pretrained.py --model repo
+```
+
+This will clone the official Hunyuan3D-2 repository to your local machine.
+
+### 2. Download Pre-trained Models
+
+```bash
+python scripts/download_pretrained.py --model all
+```
+
+This will download the pre-trained models from the Hunyuan3D-2 repository.
+
+### 3. Adapt the Model for Glasses Reconstruction
+
+```bash
+python scripts/adapt_hunyuan_model.py
+```
+
+This script will:
+- Copy the necessary files from the Hunyuan3D-2 repository
+- Create adapter classes to integrate with our glasses reconstruction pipeline
+- Set up the model for fine-tuning
+
+### 4. Use the Adapted Model
+
+```python
+from src.hunyuan_adapted.adapter import load_hunyuan_model
+
+# Load the adapted model
+model = load_hunyuan_model(
+    checkpoint_path='checkpoints/hunyuan3d_base.pth',
+    latent_dim=512,
+    num_points=2048
+)
+
+# Fine-tune the model
+model.fine_tune(freeze_hunyuan=True)
+```
+
 ## Acknowledgements
 
-- This project adapts the Hunyuan3D model for glasses reconstruction
-- Thanks to the original authors of Hunyuan3D for their foundational work
+- This project adapts the [Hunyuan3D-2 model from Tencent](https://github.com/Tencent/Hunyuan3D-2) for glasses reconstruction
+- Thanks to the original authors of Hunyuan3D-2 for their foundational work
