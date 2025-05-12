@@ -76,17 +76,32 @@ mesh.export('glasses_3d.obj')
 
 ### Processing a Dataset of Images
 
-If you have a dataset of glasses images (e.g., 600 images), you can use our dataset processing script:
+If you have a dataset of glasses images (e.g., 600+ images), you can use our specialized dataset processing scripts:
 
 ```bash
-# Process all images in a directory
-python scripts/process_dataset.py --dataset_path data/glasses --output_dir results/meshes
+# Process all images in the dataset
+python scripts/process_glasses_dataset.py --dataset_path data/train/images --output_dir results/meshes
 
 # Process with visualization
-python scripts/process_dataset.py --dataset_path data/glasses --output_dir results/meshes --visualize
+python scripts/process_glasses_dataset.py --dataset_path data/train/images --output_dir results/meshes --visualize
 
 # Process a limited number of images
-python scripts/process_dataset.py --dataset_path data/glasses --output_dir results/meshes --num_images 10
+python scripts/process_glasses_dataset.py --dataset_path data/train/images --output_dir results/meshes --num_images 10
+
+# Process from a specific starting point
+python scripts/process_glasses_dataset.py --dataset_path data/train/images --output_dir results/meshes --start_index 100
+```
+
+### Batch Processing for Large Datasets
+
+For large datasets, you can process images in batches to manage memory usage:
+
+```bash
+# Process in batches of 50 images
+python scripts/batch_process.py --dataset_path data/train/images --output_dir results/meshes --batch_size 50
+
+# Process in batches with visualization
+python scripts/batch_process.py --dataset_path data/train/images --output_dir results/meshes --batch_size 50 --visualize
 ```
 
 ### Fine-tuning for Specific Glasses Types
